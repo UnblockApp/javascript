@@ -9,6 +9,7 @@
     this.base  = BASE;
     this.state = void 0;
     this.id    = void 0; // interval id
+    this.application_name = options.application_name;
     this.interval = options.interval    || 1000; // 1 sec for ajax looping
     
     this.onConnected    = options.onConnected || noop; // event for on connection
@@ -17,7 +18,7 @@
   };
 
   // connect to api
-  UBAPlugin.prototype.connect = function(application_name) {
+  UBAPlugin.prototype.connect = function() {
     function onConnection(err, response) {
       if (response.status != 200) {
         return;
@@ -25,13 +26,21 @@
       this.start();
     }
 
-    this._onConnection.call(this, 'GET', this.base + 'connect?app_name=' + application_name, onConnection.bind(this));
+    this._onConnection.call(this, 'GET', this.base + 'connect?app_name=' + this.application_name, onConnection.bind(this));
   };
 
   // disconnect from api
   UBAPlugin.prototype.disconnect = function() {
     this.state = false;
     this._onConnection.call(this, 'GET', this.base + 'disconnect', this.onDisconnected);
+  };
+
+  UBAPlugin.prototype.alert = function(title, text, show_time) {
+    this._onConnection.call(this, 'POST', this.base + 'alert?show_time=' + show_time + '&title=' + title + '&text=' + text, noop);
+  };
+
+  UBAPlugin.prototype.notification = function(title, show_time, height, width) {
+    this._onConnection.call(this, 'GET', this.base + 'notification?lang=en&country=us&app_name='+ this.application_name + '&show_time=' + show_time + '&title=' + title + '&width=' + width + '&height=' + height, noop);
   };
 
   // start listening to status, ajax pooling
