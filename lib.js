@@ -44,6 +44,12 @@
       if (err || response.status !== 200 || !response.responseText) {
         console.error(err, response);
         this.onUninstalled();
+        if (!this.state) {
+          this.id = setInterval(function() {
+            connection();
+          }.bind(this), this.interval);
+          this.state = true;
+        }
       }
 
       try {
@@ -65,10 +71,12 @@
         clearInterval(this.id);
       } else if (responseMessage === 'connected') {
         this.onConnected();
-        this.state = true;
-        this.id = setInterval(function() {
-          connection();
-        }.bind(this), this.interval);
+        if (!this.state) {
+          this.state = true;
+          this.id = setInterval(function() {
+            connection();
+          }.bind(this), this.interval);
+        }
       } else {
         console.debug(responseMessage);
       }
